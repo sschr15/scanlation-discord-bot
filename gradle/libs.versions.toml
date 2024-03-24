@@ -1,0 +1,47 @@
+[versions]
+detekt = "1.23.5"  # Note: Plugin versions must be updated in the settings.gradle.kts too
+kotlin = "1.9.22"  # Note: Plugin versions must be updated in the settings.gradle.kts too
+
+groovy = "3.0.20"
+jansi = "2.4.1"
+kord = "0.14.0-SNAPSHOT"
+kord-extensions = "1.8.0-SNAPSHOT"
+kx-ser = "1.6.3"
+logback = "1.5.0"
+logback-groovy = "1.14.5"
+logging = "6.0.3"
+mongodb = "4.11.1"
+
+[libraries]
+detekt = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+groovy = { module = "org.codehaus.groovy:groovy", version.ref = "groovy" }
+jansi = { module = "org.fusesource.jansi:jansi", version.ref = "jansi" }
+kord-core = { module = "dev.kord:kord-core", version.ref = "kord" }
+kord-gateway = { module = "dev.kord:kord-gateway", version.ref = "kord" }
+kord-rest = { module = "dev.kord:kord-rest", version.ref = "kord" }
+kordex = { module = "com.kotlindiscord.kord.extensions:kord-extensions", version.ref = "kord-extensions" }
+kordex-mongodb = { module = "com.kotlindiscord.kord.extensions:adapter-mongodb", version.ref = "kord-extensions" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8" }
+kx-ser = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kx-ser" }
+logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+logback-groovy = { module = "io.github.virtualdogbert:logback-groovy-config", version.ref = "logback-groovy" }
+logging = { module = "io.github.oshai:kotlin-logging", version.ref = "logging" }
+mongodb-driver = { module = "org.mongodb:mongodb-driver-kotlin-coroutine", version.ref = "mongodb" }
+mongodb-bson = { module = "org.mongodb:bson-kotlinx", version.ref = "mongodb" }
+
+[bundles]
+kord = [
+  "kord-core",
+  "kord-gateway",
+  "kord-rest"
+]
+
+kordex = [
+  "kordex",
+  "kordex-mongodb"
+]
+
+mongodb = [
+  "mongodb-driver",
+  "mongodb-bson"
+]
