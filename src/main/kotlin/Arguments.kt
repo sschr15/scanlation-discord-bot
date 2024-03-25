@@ -6,8 +6,6 @@ import com.kotlindiscord.kord.extensions.commands.converters.builders.ConverterB
 import com.kotlindiscord.kord.extensions.commands.converters.impl.*
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.core.behavior.channel.GuildMessageChannelBehavior
-import dev.kord.core.behavior.channel.MessageChannelBehavior
-import dev.kord.core.behavior.channel.TextChannelBehavior
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.toList
 import kotlin.reflect.KMutableProperty0
@@ -130,7 +128,7 @@ class ChapterProgressArguments : Arguments() {
 		name = "identifier"
 		description = "The identifier of the chapter"
 
-		autocompleteChapter(::projects, ::projects.isInitialized)
+		autocompleteChapter(::projects, ::projects.isInitialized, true)
 	}
 
 	val task by enumChoice<Task> {
@@ -159,7 +157,7 @@ class ChapterStatusArguments : Arguments() {
 		name = "identifier"
 		description = "The identifier of a chapter. If not provided, all unreleased chapters will be shown."
 
-		autocompleteChapter(::projects, ::projects.isInitialized)
+		autocompleteChapter(::projects, ::projects.isInitialized, false)
 	}
 }
 
@@ -177,7 +175,7 @@ class ChapterPublishArguments : Arguments() {
 		name = "identifier"
 		description = "The identifier of the chapter"
 
-		autocompleteChapter(::projects, ::projects.isInitialized)
+		autocompleteChapter(::projects, ::projects.isInitialized, true)
 	}
 
 	val url by optionalString {
@@ -217,7 +215,7 @@ class RoleModifyArguments : Arguments() {
 		name = "chapter"
 		description = "The chapter to interact with. If unspecified, the action will apply to the entire project."
 
-		autocompleteChapter(::projects, ::projects.isInitialized)
+		autocompleteChapter(::projects, ::projects.isInitialized, true)
 	}
 }
 
@@ -235,7 +233,7 @@ class UnsetRolesArguments : Arguments() {
 		name = "chapter"
 		description = "The chapter to view unassigned roles for. If unset, show all chapters with unassigned roles."
 
-		autocompleteChapter(::projects, ::projects.isInitialized)
+		autocompleteChapter(::projects, ::projects.isInitialized, true)
 	}
 }
 
@@ -290,7 +288,7 @@ private suspend fun initIfNeeded(projectsField: KMutableProperty0<List<Project>>
 	}
 }
 
-private fun ConverterBuilder<out String?>.autocompleteChapter(projectsField: KMutableProperty0<List<Project>>, initialized: Boolean) {
+private fun ConverterBuilder<out String?>.autocompleteChapter(projectsField: KMutableProperty0<List<Project>>, initialized: Boolean, unreleasedOnly: Boolean) {
 	autoComplete { event ->
 		initIfNeeded(projectsField, initialized)
 
@@ -308,6 +306,10 @@ private fun ConverterBuilder<out String?>.autocompleteChapter(projectsField: KMu
 			return@autoComplete
 		}
 
-		suggestStringMap(projectObj.chapters.associate { (it.title ?: it.identifier) to it.identifier })
+		suggestStringMap(projectObj.chapters
+			.filter { !unreleasedOnly || it.releasedUrl != null }
+			.sorted()
+			.associate { (it.title ?: it.identifier) to it.identifier }
+		)
 	}
 }

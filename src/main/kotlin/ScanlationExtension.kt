@@ -17,6 +17,7 @@ import dev.kord.core.behavior.interaction.response.DeferredMessageInteractionRes
 import dev.kord.core.behavior.interaction.response.respond
 import dev.kord.core.entity.channel.MessageChannel
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
+import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.MessageBuilder
 import dev.kord.rest.builder.message.actionRow
 import dev.kord.rest.builder.message.embed
@@ -328,6 +329,37 @@ class ScanlationExtension : Extension() {
 
 				respond {
 					content = "Help requested."
+				}
+			}
+		}
+
+		ephemeralSubCommand {
+			name = "show-next-unreleased"
+			description = "For all projects with unreleased chapters, show the first unreleased chapter"
+
+			action {
+				val matches = mutableMapOf<Project, Chapter>()
+				projects.find().collect { project ->
+					val next = project.chapters
+						.sorted()
+						.firstOrNull { it.releasedUrl == null }
+
+					if (next != null) matches[project] = next
+				}
+
+				if (matches.isNotEmpty()) {
+					editingPaginator {
+						for ((project, chapter) in matches) page {
+							chapterEmbed(chapter)
+							footer {
+								text = project.longName?.takeIf { it.length < EmbedBuilder.Footer.Limits.text } ?: project.name
+							}
+						}
+					}
+				} else {
+					respond {
+						content = "No projects have known unreleased chapters."
+					}
 				}
 			}
 		}

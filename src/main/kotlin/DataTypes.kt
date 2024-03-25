@@ -60,4 +60,18 @@ data class Chapter(
 	val completedTasks: Multimap<Task, Snowflake>,
 	val incompleteTasks: Multimap<Task, Snowflake>,
 	val releasedUrl: String? = null,
-)
+) : Comparable<Chapter> {
+	override fun compareTo(other: Chapter): Int {
+		val myParts = identifier.split('.').map { it.toInt() }
+		val otherParts = other.identifier.split('.').map { it.toInt() }
+
+		if (myParts.first() != otherParts.first()) return myParts.first().compareTo(otherParts.first())
+
+		return when(myParts.size to otherParts.size) {
+			1 to 2 -> -1
+			2 to 1 -> 1
+			2 to 2 -> myParts[1].compareTo(otherParts[1])
+			else -> 0
+		}
+	}
+}
