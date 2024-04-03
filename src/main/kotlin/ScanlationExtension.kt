@@ -12,10 +12,12 @@ import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
 import com.mongodb.client.model.Filters.eq
 import dev.kord.common.entity.ButtonStyle
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.interaction.response.DeferredMessageInteractionResponseBehavior
 import dev.kord.core.behavior.interaction.response.respond
 import dev.kord.core.entity.channel.MessageChannel
+import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.MessageBuilder
@@ -30,6 +32,8 @@ class ScanlationExtension : Extension() {
 	override val name = "scanlations"
 
 	private val projects = db.getCollection<Project>(Project.COLLECTION_NAME)
+
+	private val commandIdMap = mutableMapOf<String, Snowflake>()
 
 	override suspend fun setup() {
 		ephemeralSlashCommand {
@@ -62,6 +66,12 @@ class ScanlationExtension : Extension() {
 
 						val task = arguments.role
 						if (task in chapter.completedTasks) {
+							val chapterCommand = commandIdMap["chapter"]
+							if (chapterCommand != null) {
+								throw DiscordRelayedException("That task is already completed. " +
+									"Use </chapter finish:$chapterCommand> to specify more users.")
+							}
+
 							throw DiscordRelayedException("That task is already completed.")
 						}
 
@@ -88,9 +98,6 @@ class ScanlationExtension : Extension() {
 						}
 					} else {
 						val task = arguments.role
-						if (task in project.primaryMembers) {
-							throw DiscordRelayedException("That task is already completed.")
-						}
 
 						val assignedUsers = project.primaryMembers.getOrDefault(task, emptySet()).toMutableSet()
 						val user = arguments.user.id
@@ -128,6 +135,12 @@ class ScanlationExtension : Extension() {
 
 						val task = arguments.role
 						if (task in chapter.completedTasks) {
+							val chapterCommand = commandIdMap["chapter"]
+							if (chapterCommand != null) {
+								throw DiscordRelayedException("That task is already completed. " +
+									"Use </chapter finish:$chapterCommand> to specify more users.")
+							}
+
 							throw DiscordRelayedException("That task is already completed.")
 						}
 
@@ -154,9 +167,6 @@ class ScanlationExtension : Extension() {
 						}
 					} else {
 						val task = arguments.role
-						if (task in project.primaryMembers) {
-							throw DiscordRelayedException("That task is already completed.")
-						}
 
 						val assignedUsers = project.primaryMembers.getOrDefault(task, emptySet()).toMutableSet()
 						val user = arguments.user.id
@@ -226,6 +236,14 @@ class ScanlationExtension : Extension() {
 							}
 						}
 					}
+				}
+			}
+		}
+
+		event<ReadyEvent> {
+			action {
+				kord.getGlobalApplicationCommands().collect {
+					commandIdMap[it.name] = it.id
 				}
 			}
 		}
