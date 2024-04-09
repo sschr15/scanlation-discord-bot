@@ -10,7 +10,7 @@ kx-ser = "1.6.3"
 logback = "1.5.0"
 logback-groovy = "1.14.5"
 logging = "6.0.3"
-mongodb = "4.11.1"
+mongodb = "5.0.0"
 
 [libraries]
 detekt = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
